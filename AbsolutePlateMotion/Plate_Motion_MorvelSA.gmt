@@ -1,0 +1,62 @@
+#!/bin/csh
+set grd=Armenia.grd
+set int=Armenia.int
+set NNR_E=/Volumes/home/Research/DataBase/morvelSpreading.East.vel.0.25.grd
+set NNR_N=/Volumes/home/Research/DataBase/morvelSpreading.North.vel.0.25.grd
+set NNR_EN=GPSdata/local_SA_ENvel_0.5grid.xyz
+
+gmt begin APM_SA_0.5degree_zoomin pdf A+m1c
+gmt set FORMAT_GEO_MAP ddd.x
+gmt set FONT_LABEL 12p,4,black
+gmt set FONT_TITLE 18p,26,black
+
+gmt makecpt -Celevation -T0/4000/500 -D -Z
+gmt basemap -JM7.5i  -R40/47/39.5/44.25 -Ba1f0.5 -BWNse -X+2 -Y+3
+#gmt grdcut @earth_relief_30s -G$grd -R30/60/27/4
+gmt grdimage $grd -I+d  -t20 -M
+#gmt grdgradient $grd -A0/90 -G$int -Ne0.2
+gmt coast -W3p -Dh -A150  -EAM,TR,IR,GE,RU,IQ,AZ,KZ,UZ,SY,JO+p2p,black  -t60 #-Lg44/46+c42+w1000+u -S145/200/255
+gmt plot PB2002_boundaries.dig.txt -W4p,gray30
+
+#-------------------grd2xyz
+#gmt grdcut $NNR_E -R30/60/27/45 -Glocal_SA_E.grd
+#gmt grdcut $NNR_N -R30/60/27/45 -Glocal_SA_N.grd
+#gmt grd2xyz local_SA_E.grd > local_SA_E.xyz
+#gmt grd2xyz local_SA_N.grd > local_SA_N.xyz
+#-------------------
+
+gmt velo -Sn0.5 -A0.5c+p3p+e -W1.5p,red $NNR_EN
+
+# echo 31 39 "Anatolia Plate" | gmt text -F+f19p,5,black+jLM -Gwhite@20 -C30%/30%+tO
+# echo 48 39 "Eurasia Plate" | gmt text -F+f19p,5,black+jLM -Gwhite@20 -C30%/30%+tO
+# echo 39 32 "Arabia Plate" | gmt text -F+f19p,5,black+jLM -Gwhite@20 -C30%/30%+tO
+#echo 39 32 "Africa"  | gmt text -F+f18p,5,black+jLM -Gwhite@20 -C30%/30%+tO 
+
+
+gmt plot -Gwhite@20 <<EOF
+47 44.25
+47 43.75
+46 43.75
+46 44.25
+EOF
+
+
+gmt velo -Sn0.5 -A0.5c+p4p+e -W1.5p,red <<EOF
+46.15 43.95 1 0
+# 55.5 43.5 2.5 0
+EOF
+
+gmt text -F+f10p,5,black+jLM <<EOF
+46.5 43.95 1 cm/yr
+46.25 44.15 Morvel SA
+EOF
+#
+# gmt text -F+f10p,5,black+jLM -N<<EOF
+# 62 31 Armenia ~ 0.7 cm/yr
+# 62 30 Iran ~ 0.7 cm/yr
+# 62 29 Arabia ~ 2.5 cm/yr
+# 62 28 Anatolia ~ 2.5 cm/yr
+# EOF
+
+
+gmt end show

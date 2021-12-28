@@ -1,0 +1,69 @@
+#!/bin/csh
+set grd=Armenia.grd
+set int=Armenia.int
+set GPS=/Volumes/home/Research/DataBase/Iran_GPS_velocity.csv
+set RGPS=/Volumes/home/Research/DataBase/Reilinger_R_etal_GPS_relativeEurasia/jgrb14718-sup-0002-ts01.txt
+set SmoothF=/Volumes/home/Research/DataBase/Armenia/00_smooth_fault_7.txt
+set range=39/48/37.5/44.5
+set AGPS=/Volumes/home/Research/DataBase/Armenia/03_Armenia_GPS_velocity.csv
+
+gmt begin GPS_velocity_zoomin pdf A+m1c
+gmt set FORMAT_GEO_MAP ddd.x
+gmt set FONT_LABEL 12p,4,black
+gmt set FONT_TITLE 18p,26,black
+
+
+gmt makecpt -Celevation -T0/4000/500 -D -Z 
+gmt basemap -JM7.5i  -R$range -Ba1f0.5 -BWNse -X+2 -Y+3 
+gmt grdcut @earth_relief_30s -G$grd -R$range
+gmt grdimage $grd -I+d  -t35
+gmt grdgradient $grd -A0/90 -G$int -Ne0.2
+gmt coast -W2p -Dh -A150  -EAM,TR,IR,GE,RU,IQ,AZ,KZ,UZ,SY,JO+p0.7p,black -S145/200/255 -t40 #-Lg44/46+c42+w1000+u
+#gmt colorbar -C -Dx3.5/-0.5+w10c/0.5c+o0c/-1c+mc+jBL+h -Bxaf -By+l"Elevation (m)" 
+
+set Rcolor=black
+
+gmt plot $SmoothF -W2p,brown
+
+awk -F, 'NR>1 && $9 ~ /Raeesi/ {print $2,$3,$4,$5,$6,$7,$8}' $GPS > temp.out
+gmt psvelo temp.out -Se0.1c/0.95/4 -G$Rcolor -W1p,$Rcolor -A0.3c+p1.2p+e
+awk -F, 'NR>1 && $9 ~ /IPGN/ {print $2,$3,$4,$5,$6,$7,$8}' $GPS > temp2.out
+gmt psvelo temp2.out -Se0.1c/0.95/4  -Gred -W1p,red -A0.3c+p1.2p+e
+# awk -F, 'NR>1 && $9 ~ /Reilinger/ {print $2,$3,$4,$5,$6,$7,$8}' $GPS > temp3.out
+# gmt psvelo temp3.out -Se0.05c/0.95/4  -Gblue -W1p,blue -A0.3c+p1.2p+e
+awk 'NR>1 {print $2,$3,$4,$5,$6,$7,$8}' $RGPS > temp3.out
+gmt psvelo temp3.out -Se0.1c/0.95/4  -Gblue -W1p,blue -A0.3c+p1.2p+e
+
+awk -F, 'NR>1 {print $1,$2,$3,$4,$5,$6,$7}' $AGPS >temp4.out
+gmt psvelo temp4.out -Se0.1c/0.95/4  -Gdeepskyblue1 -W1p,deepskyblue1 -A0.3c+p1.2p+e
+
+gmt plot -Gwhite@20 <<EOF
+45.5 43.5
+45.5 44.5
+48 44.5
+48 43.5
+EOF
+
+gmt psvelo -Se0.1c/0.95/4  -G$Rcolor -W1p,$Rcolor -A0.3c+p1.2p+e <<EOF
+45.75 44.2 10 0 0 0 0  
+EOF
+gmt psvelo -Se0.1c/0.95/4  -Gred -W1p,red -A0.3c+p1.2p+e <<EOF
+45.75 44.0 10 0 0 0 0
+EOF
+gmt psvelo -Se0.1c/0.95/4  -Gblue -W1p,blue -A0.3c+p1.2p+e <<EOF
+45.75 43.8 10 0 0 0 0
+EOF
+gmt psvelo -Se0.1c/0.95/4  -Gdeepskyblue1 -W1p,deepskyblue1 -A0.3c+p1.2p+e <<EOF
+45.75 43.6 10 0 0 0 0
+EOF
+
+echo 46.3 44.0 "Raeesi et al., (2017)" | gmt text  -F+f10p,5,black+jLM 
+echo 46.3 44.2 "IPGN" | gmt text  -F+f10p,5,black+jLM
+echo 46.3 43.8 "Relinger et al., (2006)" | gmt text  -F+f10p,5,black+jLM
+echo 46.3 43.6 "Karakhanyan, A et al., (2013)" | gmt text  -F+f8p,5,black+jLM
+echo 45.75 44.4 "10 mm/yr" | gmt text  -F+f10p,5,black+jLM
+
+
+gmt end show
+
+rm -f temp*.out

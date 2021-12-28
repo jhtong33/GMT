@@ -1,0 +1,57 @@
+#!/bin/csh
+set grd=Armenia.grd
+set int=Armenia.int
+set PnAni=PnAnisotropy_YanLu2017_plot.csv
+set Region=39/48/37.5/44.5
+
+gmt begin PnAnisotropy_Velocity png,pdf A+m1c
+gmt set FORMAT_GEO_MAP ddd.x
+gmt set FONT_LABEL 12p,4,black
+gmt set FONT_TITLE 18p,26,black
+
+gmt makecpt -Celevation -T0/4000/500 -D -Z
+gmt basemap -JM7.5i  -R$Region -Ba1f0.5 -BWNse -X+2 -Y+3
+gmt grdgradient $grd -A0/90 -G$int -Ne0.2
+
+awk -F, 'NR>1 {print $1, $2, $3}' $PnAni > temp_vel.txt
+gmt blockmean temp_vel.txt -I0.01/0.01 -R$Region > temp_vel0.1.txt
+gmt surface temp_vel0.1.txt -I0.01/0.01 -Gout.grd -R$Region
+
+gmt makecpt -Cjet -I -H -A50 -T7.5/8.5/0.2 -Z > PnVel.cpt
+gmt grdimage out.grd -CPnVel.cpt -t30
+
+gmt coast -W3p -Dh -A150  -EAM,TR,IR,GE,RU,IQ,AZ,KZ,UZ,SY,JO+p2p,black  -t30 
+
+
+awk -F, 'NR>1 {print $1, $2, $4, $5}' $PnAni | gmt velo -Sn1i -W3p,black
+
+echo 31 39 "Anatolia" | gmt text -F+f19p,5,black+jLM -Gwhite@20 -C30%/30%+tO
+echo 48 39 "Eurasia" | gmt text -F+f19p,5,black+jLM -Gwhite@20 -C30%/30%+tO
+echo 39 32 "Arabia" | gmt text -F+f19p,5,black+jLM -Gwhite@20 -C30%/30%+tO 
+#echo 39 32 "Africa"  | gmt text -F+f18p,5,black+jLM -Gwhite@20 -C30%/30%+tO 
+
+gmt plot -Gwhite@10 <<EOF
+48 44.5
+48 43.75
+46.5 43.75
+46.5 44.5
+EOF
+
+
+gmt velo -Sn1i -W3p,black <<EOF
+46.7 43.9 0.1 0
+46.7 44.1 0.25 0
+EOF
+
+gmt text -F+f10p,5,black+jLM <<EOF
+47.2 43.9 0.1% 
+47.2 44.1 0.25%
+46.73 44.35 Pn Anisotropy
+EOF
+
+gmt colorbar -CPnVel.cpt -t30 -Dx4c/-0.6c+w8c/0.3c+jTC+h -Bxa0.1f0.05+l"Pn Velocity" -By+lkm/s
+
+gmt end show
+
+rm -f temp*.txt 
+rm -f PnVel.cpt

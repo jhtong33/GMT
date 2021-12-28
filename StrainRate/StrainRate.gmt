@@ -1,0 +1,65 @@
+#!/bin/csh
+set grd=Armenia.grd
+set int=Armenia.int
+set Region=39/48/37.5/44.5
+# set Region=44/62/24/43
+set Strain=GSRM_average_strain_v2.1_plot.txt
+set AF=/Volumes/home/Research/DataBase/Armenia/00_A_fault.txt
+set ActiveF=/Volumes/home/Research/DataBase/Armenia/00_Active_faults.txt
+set STF=/Volumes/home/Research/DataBase/Armenia/00_ST_Fault_with_Sard.txt
+set SmoothF=/Volumes/home/Research/DataBase/Armenia/00_smooth_fault_7.txt
+
+
+gmt begin StrainRate png A+m1c
+gmt set FORMAT_GEO_MAP ddd.x
+gmt set FONT_LABEL 12p,4,black
+gmt set FONT_TITLE 18p,26,black
+
+gmt makecpt -Celevation -T0/4000/500 -D -Z
+gmt basemap -JM7.5i  -R$Region -Ba1f0.5 -BWNse -X+2 -Y+3
+gmt grdcut @earth_relief_30s -G$grd -R$Region
+gmt grdimage $grd -I+d  -t20 -M
+gmt grdgradient $grd -A0/90 -G$int -Ne0.2
+gmt coast -W3p -Dh -A150  -EAM,TR,IR,GE,RU,IQ,AZ,KZ,UZ,SY,JO+p1.5p,black  -t30  -U"Tong-StrainRate"
+
+
+echo 31 39 "Anatolia" | gmt text -F+f19p,5,black+jLM -Gwhite@20 -C30%/30%+tO
+echo 48 39 "Eurasia" | gmt text -F+f19p,5,black+jLM -Gwhite@20 -C30%/30%+tO
+echo 39 32 "Arabia" | gmt text -F+f19p,5,black+jLM -Gwhite@20 -C30%/30%+tO 
+#echo 39 32 "Africa"  | gmt text -F+f18p,5,black+jLM -Gwhite@20 -C30%/30%+tO 
+
+gmt plot $STF -W2p,lightorange
+gmt plot $AF -W2p,darkbrown
+gmt plot $ActiveF -W2p,darksalmon
+
+# gmt plot $SmoothF -W2p,brown
+
+cat $Strain | awk 'NR>1 {print $2, $1, $12/1000, 0, $14+90}' | gmt velo -Sx10 -L -A10p+e -Gred  -W1p,red
+cat $Strain | awk 'NR>1 {print $2, $1, 0, $13/1000, $14+90}' | gmt velo -Sx10 -L -A10p+e -Gblue -W1p,blue
+
+gmt plot -Gwhite@10 <<EOF
+48 44.5
+48 43.5
+46 43.5
+46 44.5
+EOF
+
+
+
+gmt velo -Sx10 -W2p,red  -L -A10p+e -Gred <<EOF
+46.6 43.9 0.1 0 90
+47.5 43.9 0.05 0 90
+EOF
+
+gmt velo -Sx10 -W2p,blue  -L -A10p+e -Gblue <<EOF
+46.6 43.9 0 -0.1 90
+47.5 43.9 0 -0.05 90
+EOF
+
+gmt text -F+f10p,5,black+jLM <<EOF
+46.32 44.35 0.1\265/yr
+47.2 44.35 0.05\265/yr
+# 46.73 44.35 Pn Anisotropy
+EOF
+
+gmt end show

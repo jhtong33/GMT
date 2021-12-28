@@ -1,0 +1,75 @@
+#!/bin/csh
+set grd=Armenia.grd
+set int=Armenia.int
+set sta=/Volumes/home/Research/DataBase/Armenia/Station_info.csv
+set GOsta=/Volumes/home/Research/DataBase/Armenia/GO_stations_info.csv
+
+
+gmt begin map_station_distribution pdf A+m1c
+gmt set FORMAT_GEO_MAP ddd.x
+gmt set FONT_LABEL 12p,4,black
+gmt set FONT_TITLE 18p,26,black
+
+
+gmt makecpt -Celevation -T0/4000/500 -D -Z 
+gmt basemap -JM7.5i -R40/47/39.5/44.3 -Ba2f1 -BWNse -X+2 -Y+2.5
+gmt grdcut @earth_relief_15s -G$grd -R40/47/39.5/44.3
+gmt grdimage $grd -I+d  -t20
+gmt grdgradient $grd -A0/90 -G$int -Ne0.2
+gmt coast -W3p -Dh -A150 -EAM,TR,IR,GE,RU,IQ,AZ+p1.5p,black  -S145/200/255 -t40 #-Lg44/46+c42+w1000+u
+#gmt colorbar -C -Dx3.5/-0.5+w10c/0.5c+o0c/-1c+mc+jBL+h -Bxaf -By+l"Elevation (m)" 
+
+###Station
+cat $sta| awk -F, 'NR>1 {if ($2 == "GO") print $5,$4}'  | gmt plot -Sc0.3 -Gyellow -W1p,black
+cat $sta| awk -F, 'NR>1 {if ($2 == "GE" && $1 != "#IES_BB") print $5,$4}'  | gmt plot -Sc0.3 -Gtomato1 -W1p,black
+cat $sta| awk -F, 'NR>1 {if ($2 == "TG") print $5,$4}'  | gmt plot -Sc0.3 -Gblue -W1p,black
+cat $sta| awk -F, 'NR>1 {if ($2 == "AM") print $5,$4}'  | gmt plot -Sc0.3 -Gspringgreen -W1p,black
+cat $sta| awk -F, 'NR>1 {if ($1 == "IRIS_GSN") print $5,$4}'  | gmt plot -Sd0.3 -Gred -W1p,black
+#cat $GOsta| awk -F, 'NR>1 {print $4,$3}'  | gmt plot -Sc0.3 -Gyellow -W1p,black
+cat $GOsta| awk -F, 'NR>1 {print $4,$3}'  | gmt plot -Sc0.3 -W2p,yellow
+
+cat $sta| awk -F, 'NR>1 {if ($1 == "IRIS_GSN") print $5,$4-0.15,$3}'  | gmt text -F+f13p,5,black+jMC -Gwhite@20
+cat $sta| awk -F, 'NR>1 {if ($2 == "GE" && $5<43.4 && $1 != "#IES_BB") print $5-0.12,$4,$3}'  | gmt text -F+f11p,5,black+jRM -Gwhite@20
+cat $sta| awk -F, 'NR>1 {if ($2 == "GE" && $5>43.4 && $1 != "#IES_BB") print $5,$4+0.12,$3}'  | gmt text -F+f11p,5,black+jMC -Gwhite@20
+cat $sta| awk -F, 'NR>1 {if ($2 == "AM" && $3 != "SHEN") print $5,$4-0.12,$3}'  | gmt text -F+f11p,5,black+jMC -Gwhite@20
+cat $sta| awk -F, 'NR>1 {if ($2 == "GO" && $5>44) print $5+0.12,$4+0.1,$3}'  | gmt text -F+f11p,5,black+jBC -Gwhite@20
+cat $sta| awk -F, 'NR>1 {if ($3 == "ONI") print $5,$4+0.15,$3}'  | gmt text -F+f11p,5,black+jMC -Gwhite@20
+cat $sta| awk -F, 'NR>1 {if ($3 == "AKH") print $5,$4+0.15,$3}'  | gmt text -F+f11p,5,black+jMR -Gwhite@20
+cat $sta| awk -F, 'NR>1 {if ($3 == "BGD") print $5-0.1,$4-0.1,$3}'  | gmt text -F+f11p,5,black+jMC -Gwhite@20
+cat $sta| awk -F, 'NR>1 {if ($2 == "TG" && $3 != "ABST" && $3 != "AZMN") print $5,$4+0.12,$3}'  | gmt text -F+f11p,5,black+jMC -Gwhite@20
+cat $sta| awk -F, 'NR>1 {if ($3 == "SHEN" || $3 == "AZMN") print $5-0.12,$4,$3}'  | gmt text -F+f11p,5,black+jRM -Gwhite@20
+cat $GOsta| awk -F, 'NR==5 {print $4,$3-0.1,$2}' | gmt text -F+f11p,5,black+jMC -Gyellow@20
+cat $GOsta| awk -F, 'NR==14 {print $4+0.05,$3+0.25,$2}' | gmt text -F+f11p,5,black+jMC -Gyellow@20
+cat $GOsta| awk -F, 'NR==8 {print $4,$3-0.1,$2}' | gmt text -F+f11p,5,black+jMC -Gyellow@20
+cat $GOsta| awk -F, 'NR==12 {print $4+0.1,$3+0.23,$2}' | gmt text -F+f11p,5,red+jMC -Gwhite@20
+
+
+
+cat << EOF |gmt text -F+f19p,5,black+jLM  -N
+41 39.3 TG network
+41 39 GO network
+43 39.3 AM network
+43 39 GE network
+45 39.3 GSN network
+45 39 KO network
+EOF
+
+echo 40.7 39.3 | gmt plot  -Sc0.3 -Gblue -W0.3p,black -N
+echo 40.7 39 | gmt plot  -Sc0.3 -Gyellow -W0.3p,black -N
+echo 42.7 39.3 | gmt plot  -Sc0.3 -Gspringgreen -W0.3p,black -N
+echo 42.7 39 | gmt plot  -Sc0.3 -Gtomato1 -W0.3p,black -N
+echo 44.7 39.3 | gmt plot  -Sd0.3 -Gred -W0.3p,black -N
+echo 44.7 39 | gmt plot  -Sc0.3 -Gwhite -W0.3p,black -N
+
+
+
+### country name
+echo 45 43.8 Russia | gmt text -F+f17p,7,black
+echo 41 42 Black Sea| gmt text -F+f17p,7,black
+echo 42 42.3 Georgia| gmt text -F+f17p,7,black
+echo 44.2 40.65 Armenia| gmt text -F+f17p,7,black
+echo 42 40.5 Turkey| gmt text -F+f18p,7,black
+echo 46 41 Azerbaijan| gmt text -F+f17p,7,black+a-30
+
+
+gmt end show

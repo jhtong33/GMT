@@ -1,0 +1,160 @@
+#!/bin/csh
+set dirnm = $cwd
+set datafolder = "/home/sky08/Armenia"
+set stafile = "${datafolder}/Final_station_201212cyl.txt"
+set staIGS = "${datafolder}/IGS_201108.txt"
+set staTWs = "${datafolder}/Net_Arm_201212.txt"
+set faultfile = "${datafolder}/ST_Fault_with_Sard.txt"
+set topo = "${datafolder}/topo30.grd"
+set cpt = "${datafolder}/cute.cpt"
+set SKS_B = "${datafolder}/SKS/SKS_table/Biryol_GJI2012_Tab1.txt"
+set SKS_Kper = "${datafolder}/SKS/SKS_table/Kaviani_EPSL2009_Iran_permanent.txt"
+set SKS_Ktem = "${datafolder}/SKS/SKS_table/Kaviani_EPSL2009_Iran_temporary.txt"
+set SKS_DB = "${datafolder}/SKS/SKS_database/splittingDB.txt"
+set SKS_DBout = "splittingDB_area.txt"
+set out1 = "tmp_station_sym.out"
+set ps = "map_Georgia_SKSx.ps"
+set pdf = "map_Georgia_SKSx.pdf"
+
+set border = 40/46.5/39.8/44.0
+set borderp = 33/60/28/48
+set size = 6.8
+set adjx = 0.8
+set tick = a5
+set SKSt = 0.2
+
+set grd = Armenia.grd
+set int = Armenia.int
+grdcut $topo -G$grd -R$borderp -fg
+grdgradient $grd -A0/270 -G$int -Ne0.5
+
+set lon1 = `echo $border | awk -F/ '{print $1}'`
+set lon2 = `echo $border | awk -F/ '{print $2}'`
+set lat1 = `echo $border | awk -F/ '{print $3}'`
+set lat2 = `echo $border | awk -F/ '{print $4}'`
+set lonp1 = `echo $borderp | awk -F/ '{print $1}'`
+set lonp2 = `echo $borderp | awk -F/ '{print $2}'`
+set latp1 = `echo $borderp | awk -F/ '{print $3}'`
+set latp2 = `echo $borderp | awk -F/ '{print $4}'`
+
+cat > $out1 <<END
+IES_BB                   s0.08  0/0/255   1      65.0 43 - IES BB 
+GEO_BB                   s0.08  0/255/255 1      65.0 42 - Geo BB
+GEO_2012_station         c0.07  255/255/0 1      65.0 41 - Geo 2013 planned
+IRIS_GSN                 t0.08  255/5/205 1      65.0 38 - IRIS GSN
+TK_search_station        t0.08  255/0/0   1      65.0 37 - Turkey station (KOERI)
+END
+
+gmtset LABEL_FONT Times-Roman
+gmtset MEASURE_UNIT inch  
+gmtset TICK_LENGTH 0.05i 
+gmtset ANNOT_FONT_SIZE_PRIMARY 12
+
+psbasemap -JM$size -R$borderp -B${tick}WNse -X0.6 -Y1.2 -K > $ps
+grdimage $grd -C$cpt -JM -R -I$int -O -K >> $ps
+pscoast -JM -R -W4 -Df -A1000 -N1/1p -O -K  >> $ps
+
+# fault
+#psxy $faultfile -R -J -M -W1/255/0/0 -O -K >> $ps
+
+# color bar
+psscale -D3.5/-0.3/6/0.13h -C$cpt -B2000f500:Topography:/:m: --LABEL_FONT_SIZE=14 --ANNOT_FONT_SIZE=10 -O -K >> $ps
+
+# SKS splitting
+set bar = VB0.1c/0p/0p
+set nulls = c0.06
+set nullw = 3
+set colB = 0/100/0
+set colKper = red
+set colKtem = blue
+set colGlo = 255/165/0
+
+head -1 $SKS_DB > $SKS_DBout
+awk -F"|" '($4 >= '$lonp1') && ($4 <= '$lonp2') && ($3 >= '$latp1') && ($3 <= '$latp2') {print $0}' $SKS_DB >> $SKS_DBout
+awk -F"|" '($3*$3>0 && $6>0 && tolower($5) != "null") {print $4,$3,$5,$6*'$SKSt'}' $SKS_DBout | psxy -R -JM -S${bar} -G${colGlo} -K -O -N >> $ps
+awk -F"|" '$3*$3>0 && ($6==0 || tolower($5) == "null") {print $4,$3}' $SKS_DBout | psxy -R -JM -S${nulls} -W${nullw},${colGlo} -K -O -N >> $ps
+
+awk '(NR > 1) && ($3 >= '$lonp1') && ($3 <= '$lonp2') && ($2 >= '$latp1') && ($2 <= '$latp2') {print $0}' $SKS_B > zB
+awk '($8 != "-") && ($9 != "-") {print $3,$2,$8,$9*'$SKSt'}' zB | psxy -R -JM -S${bar} -G${colB} -K -O -N >> $ps
+awk '($8 == "-") || ($9 == "-") {print $3,$2}' zB | psxy -R -JM -S${nulls} -W${nullw},${colB} -K -O -N >> $ps
+
+awk '(NR > 1) && ($3 >= '$lonp1') && ($3 <= '$lonp2') && ($2 >= '$latp1') && ($2 <= '$latp2') {print $0}' $SKS_Ktem > zKtem
+awk '($8 != "Null") && ($6 > 0.) {print $3,$2,$8,$6*'$SKSt'}' zKtem | psxy -R -JM -S${bar} -G${colKtem} -K -O -N >> $ps
+awk '($8 == "Null") || ($6 == 0.) {print $3,$2}' zKtem | psxy -R -JM -S${nulls} -W${nullw},${colKtem} -K -O -N >> $ps
+
+awk '(NR > 1) && ($3 >= '$lonp1') && ($3 <= '$lonp2') && ($2 >= '$latp1') && ($2 <= '$latp2') {print $0}' $SKS_Kper > zKper
+awk '($8 != "Null") && ($6 > 0.) {print $3,$2,$8,$6*'$SKSt'}' zKper | psxy -R -JM -S${bar} -G${colKper} -K -O -N >> $ps
+awk '($8 == "Null") || ($6 == 0.) {print $3,$2}' zKper | psxy -R -JM -S${nulls} -W${nullw},${colKper} -K -O -N >> $ps
+
+echo 63.5 33 13 0 5 5 "1 sec" | pstext -R -JM -K -O -N >> $ps
+echo 64 32 90 $SKSt | psxy -R -JM -S${bar} -G${colB} -K -O -N >> $ps
+echo 64 31 90 $SKSt | psxy -R -JM -S${bar} -G${colKper} -K -O -N >> $ps
+echo 64 30 90 $SKSt | psxy -R -JM -S${bar} -G${colKtem} -K -O -N >> $ps
+echo 64 29 90 $SKSt | psxy -R -JM -S${bar} -G${colGlo} -K -O -N >> $ps
+echo 65.8 33 13 0 5 5 "null" | pstext -R -JM -K -O -N >> $ps
+echo 66 32 90 $SKSt | psxy -R -JM -S${nulls} -W${nullw},${colB} -K -O -N >> $ps
+echo 66 31 90 $SKSt | psxy -R -JM -S${nulls} -W${nullw},${colKper} -K -O -N >> $ps
+echo 66 30 90 $SKSt | psxy -R -JM -S${nulls} -W${nullw},${colKtem} -K -O -N >> $ps
+echo 66 29 90 $SKSt | psxy -R -JM -S${nulls} -W${nullw},${colGlo} -K -O -N >> $ps
+echo 68 32 13 0 5 5 "Biryol (2010) "| pstext -R -JM -K -O -N >> $ps
+echo 68 31 13 0 5 5 "Kaviani (2009) - permanent"| pstext -R -JM -K -O -N >> $ps
+echo 68 30 13 0 5 5 "Kaviani (2009) - temporary"| pstext -R -JM -K -O -N >> $ps
+echo 68 29 13 0 5 5 "Splitting data base"| pstext -R -JM -K -O -N >> $ps
+
+
+# seismic station distribution  # station symbol & text
+foreach NR(`awk '{print NR}' $out1`)
+set CS = `sed -n ${NR}p $out1 | awk '{print $1}'`
+set CSsym = `sed -n ${NR}p $out1 | awk '{print $2}'`
+set CSsym1 = `sed -n ${NR}p $out1 | awk '{print substr($2,1,1)}'`
+set CScol = `sed -n ${NR}p $out1 | awk '{print $3}'`
+set CSwid = `sed -n ${NR}p $out1 | awk '{print $4}'`
+set CSx = `sed -n ${NR}p $out1 | awk '{print $5}'`
+set CSy = `sed -n ${NR}p $out1 | awk '{print $6}'`
+set CSt = `sed -n ${NR}p $out1 | awk -F"-" '{print $2}'`
+awk '($1 ~ CS) && ($4 >= '$lon1') && ($4 <= '$lon2') && ($3 >= '$lat1') && ($3 <= '$lat2') {print $0}' CS=$CS $stafile > z
+awk '{print $4,$3}' z | psxy -JM -R -S$CSsym -G$CScol -W$CSwid -N -O -K >> $ps
+##awk '{print $4,$3,10,0,5,1,$2}' z | pstext -JM -R -N -O -K >> $ps
+echo $CSx $CSy | psxy -JM -R -S${CSsym1}0.2 -G$CScol -N -W$CSwid -O -K >> $ps
+echo $CSx $CSy $adjx | awk '{print $1+$3,$2,13,0,5,5,CSt}' "CSt=$CSt" | pstext -JM -R -N -K -O >> $ps
+end
+
+# Armenia
+awk '(NR > 1) && (($1 ~ /Gre/) || ($1 ~ /Yel/)){print $4,$3}' $staTWs | psxy -JM -R -Sc0.07 -G0/205/0 -W1 -N -O -K >> $ps
+##awk '(NR > 1) && (($1 ~ /Gre/) || ($1 ~ /Yel/)){print $4,$3,10,0,5,1,$2}' $staTWs | pstext -JM -R -N -O -K >> $ps
+echo 65 40.0 | psxy -JM -R -Sc0.2 -G0/205/0 -N -W1 -O -K >> $ps
+echo 65 40.0 $adjx | awk '{print $1+$3,$2,13,0,5,5,"Taiwan stations"}' | pstext -JM -R -N -K -O >> $ps
+
+awk '(NR > 1){print $4,$3}' $staIGS | psxy -JM -R -Sc0.05 -Gwhite -W1 -N -O -K >> $ps
+##awk '(NR > 1){print $4,$3,9,0,5,1,$2}' $staIGS | pstext -JM -R -N -O -K >> $ps
+echo 65 39.0 | psxy -JM -R -Sc0.2 -Gwhite -N -W1 -O -K >> $ps
+echo 65 39.0 $adjx | awk '{print $1+$3,$2,13,0,5,5,"IGS"}' | pstext -JM -R -N -K -O >> $ps
+
+
+
+pstext -JM -R -N -O -UBL/0/6.8/"$dirnm/$ps" <<END>> $ps
+41 46 12 0 18 5 Russia
+35 43 12 0 18 5 Black Sea
+42.0 42.1 12 0 18 5 Georgia
+43.9 40.8 12 0 18 5 Armenia
+35 39 12 0 18 5 Turkey
+46 40.5 12 0 18 5 Azerbaijan
+48.5 43 12 0 18 5 Caspian
+49 42 12 0 18 5 Sea
+33.2 32 12 65 18 5 Mediterranean
+34 32 12 65 18 5 Sea
+53 35 12 0 18 5 Iran
+42.5 35.5 12 0 18 5 Iraq
+38 35.5 12 0 18 5 Syria
+55 40 12 0 18 5 Turkmenistan
+54 47 12 0 18 5 Kazakhstan
+56 43 12 0 18 5 Uzbekistan
+35.5 32 12 0 18 5 Jordan
+38 30 12 0 18 5 Saudi Arabia
+34 47 12 0 18 5 Ukraine
+END
+
+rm -f z $out1 zB zKtem zKper
+ps2pdf $ps $pdf
+gv $ps &
+
