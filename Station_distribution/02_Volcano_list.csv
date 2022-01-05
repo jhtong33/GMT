@@ -1,0 +1,26 @@
+VolcanoName,lat,lon,region,age,http
+Aragats,40.53,44.2,Armenia,Holocene,https://volcano.si.edu/volcano.cfm?vn=214060
+Ghegham,40.283,45,Armenia,Holocene,https://volcano.si.edu/volcano.cfm?vn=214070
+Vaiyots-Sar,39.797,45.497,Armeniam,Holocene,https://volcano.si.edu/volcano.cfm?vn=214080
+Kazbek,42.7,44.5,Georgia,Holocene,https://volcano.si.edu/volcano.cfm?vn=214020
+Samsari,41.542,43.7,Georgia,Holocene,https://volcano.si.edu/volcano.cfm?vn=214050
+Nemrut Dagi,38.654,42.229,Turkey,Holocene,https://volcano.si.edu/volcano.cfm?vn=213020
+Ararat,39.7,44.3,Turkey,Holocene,https://volcano.si.edu/volcano.cfm?vn=213040
+Porak,40.028,45.74,Armenia-Azerbaijan,Pleistocene,https://volcano.si.edu/volcano.cfm?vn=214090
+Tskhouk-Karckar,39.742,45.992,Armenia-Azerbaijan,Holocene,https://volcano.si.edu/volcano.cfm?vn=214100
+Elbrus,43.351,42.442,Russia,Holocene,https://volcano.si.edu/volcano.cfm?vn=214010
+Sabalan,38.268,47.835,Iran,Holocene,https://volcano.si.edu/volcano.cfm?vn=232002
+Sahand,37.75,46.43,Iran,Pleistocene,https://volcano.si.edu/volcano.cfm?vn=232001
+Keli Highland,42.45,44.25,Georgia,Pleistocene,fromGoogleEarth
+Dzau,42.404,44.004,Georgia,Pleistocene,fromGoogleEarth
+Akhuryan Valley,41.067,43.75,Armenia,Pleistocene,fromGoogleEarth
+Shamiram Plateau,40.2,44.15,Armenia,Holocene,fromGoogleEarth
+Unnamed,40.058,45.608,Armenia,Pleistocene,fromGoogleEarth
+Unnamed,39.617,46.1,Armenia,Pleistocene,fromGoogleEarth
+Arpacay,41,43.467,Turkey,Pleistocene,fromGoogleEarth
+Kisir Dagi,40.97,43.07,Turkey,Pleistocene,fromGoogleEarth
+Kargapazari Dagi,40.005,41.675,Turkey,Pleistocene,fromGoogleEarth
+Tenduruk Dagi,39.356,43.874,Turkey,Holocene,fromGoogleEarth
+Etrusk,39.032,43.66,Turkey,Pleistocene,fromGoogleEarth
+Girekol,39.104,43.426,Turkey,Pleistocene,fromGoogleEarth
+Suphan Dagi,38.931,42.833,Turkey,Pleistocene,fromGoogleEarth
