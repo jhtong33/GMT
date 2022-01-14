@@ -3,6 +3,7 @@ set grd=Armenia.grd
 set int=Armenia.int
 set PnAni=PnAnisotropy_YanLu2017_plot.csv
 set Region=39/48/37.5/44.5
+set Volcano=/Volumes/home/Research/DataBase/01_Armenia/02_Volcano_list.csv
 
 gmt begin PnAnisotropy_Velocity png,pdf A+m1c
 gmt set FORMAT_GEO_MAP ddd.x
@@ -20,7 +21,7 @@ gmt surface temp_vel0.1.txt -I0.01/0.01 -Gout.grd -R$Region
 gmt makecpt -Cjet -I -H -A50 -T7.5/8.5/0.2 -Z > PnVel.cpt
 gmt grdimage out.grd -CPnVel.cpt -t30
 
-gmt coast -W3p -Dh -A150  -EAM,TR,IR,GE,RU,IQ,AZ,KZ,UZ,SY,JO+p2p,black  -t30 
+gmt coast -W2p -Dh -A150  -EAM,TR,IR,GE,RU,IQ,AZ,KZ,UZ,SY,JO+p1p,black  -t30 
 
 
 awk -F, 'NR>1 {print $1, $2, $4, $5}' $PnAni | gmt velo -Sn1i -W3p,black
@@ -49,7 +50,19 @@ gmt text -F+f10p,5,black+jLM <<EOF
 46.73 44.35 Pn Anisotropy
 EOF
 
+awk -F, 'NR>1 {if ($7=="1") print $3,$2}' $Volcano | gmt plot -Skvolcano/0.45 -Gred -W1p,black
+awk -F, 'NR>1 {if ($7=="2") print $3,$2}' $Volcano | gmt plot -Skvolcano/0.45 -Gblack -W0.5p,black
+awk -F, 'NR>1 {if ($7=="3") print $3,$2}' $Volcano | gmt plot -Skvolcano/0.35 -Ggrey -W1p,black
+
 gmt colorbar -CPnVel.cpt -t30 -Dx4c/-0.6c+w8c/0.3c+jTC+h -Bxa0.1f0.05+l"Pn Velocity" -By+lkm/s
+
+echo 44 37.2 | gmt plot  -Skvolcano/0.45 -Ggrey -N -W1p,black
+echo 45 37.2 | gmt plot  -Skvolcano/0.45 -Gblack -N -W1p,black
+echo 46 37.2 | gmt plot  -Skvolcano/0.45 -Gred -N  -W1p,black
+echo 44 37.0 Pleistocene | gmt text  -F+f12p,5,black+jCM -N 
+echo 45 37.0 Holocene | gmt text  -F+f12p,5,black+jCM -N 
+echo 46 37.0 Last Eruption | gmt text  -F+f10p,5,black+jCM -N 
+echo 46 36.8 "<10000 yrs" | gmt text  -F+f10p,5,black+jCM -N 
 
 gmt end show
 
