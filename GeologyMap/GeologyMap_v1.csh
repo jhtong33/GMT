@@ -74,6 +74,7 @@ gmt text -F+a -F+f14p,7,black=~1.5,white+jLM <<EOF
 48 33.5 -37 Zargos
 55.5 37.8 0 Kopeh dagu
 56 36.8 0 Binalud
+40.5 39.5 -32 Bitlis-Zagros Suture
 EOF
 
 gmt text -F+f14p,9,50+jLM <<EOF

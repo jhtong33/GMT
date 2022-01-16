@@ -6,6 +6,8 @@ set GPS=/Volumes/home/Research/DataBase/Iran_GPS_velocity.csv
 set RGPS=/Volumes/home/Research/DataBase/03_Reilinger_R_etal_GPS_relativeEurasia/jgrb14718-sup-0002-ts01.txt
 set AGPS=/Volumes/home/Research/DataBase/01_Armenia/03_Armenia_GPS_velocity.csv
 set region=40/47.5/38.5/43.5
+set Volcano=/Volumes/home/Research/DataBase/01_Armenia/02_Volcano_list.csv
+set SmoothF=/Volumes/home/Research/DataBase/01_Armenia/00_smooth_fault_7.txt
 
 gmt begin GeologyMap_v2 pdf A+m1c
 gmt set FORMAT_GEO_MAP ddd.x
@@ -14,23 +16,19 @@ gmt set FONT_TITLE 18p,26,black
 
 
 gmt makecpt -Celevation -T0/4000/500 -D -Z
-gmt basemap -JM7.5i  -R$region -Ba1f0.5 -BWNse -X+2 -Y+3 -U/0.5/17/"Tong"
+gmt basemap -JM7.5i  -R$region -Ba1f0.5 -BWNse -X+2 -Y+3 -U/0.5/18/"Tong"
 gmt grdcut @earth_relief_30s -G$grd -R$region
 gmt grdimage $grd -I+d  -t40
 gmt grdgradient $grd -A0/90 -G$int -Ne0.2
 gmt coast -W1p -Dh -A150  -EAM,TR,IR,GE,RU,IQ,AZ,KZ,UZ,SY,JO+p0.5p,black,-- -S145/200/255 -t30 #-Lg44/46+c42+w1000+u
 
-###Event 
-awk '{if ($6<5) {print $1,$2}}' $event | gmt plot -Sc0.08c -G160 -W0.05p,120
-awk '{if (5<=$6 && $6<6) {print $1,$2}}' $event | gmt plot -Sc0.1c -G140 -W0.05p,120
-awk '{if (6<=$6) {print $1,$2}}' $event | gmt plot -Sa0.3c -Ggold1 -W0.05p,120
+gmt plot $SmoothF -W1p,brown
 
-###Plate relative motion
-#Arabian plate
-##GSRM v2.1, speed 17.98 mm/yr N17.73 E-2.97
-echo 41 36 350.50 2c | gmt plot -SV1c+ea -W8p,50 -G50 
-echo 40.8 37 -80 17.98mm/yr | gmt text -F+a -F+f6.5p,1,white
-#Anatolian block
+###Event 
+awk '{if ($6<5) {print $1,$2}}' $event | gmt plot -Sc0.1c -G160 -W0.05p,120
+awk '{if (5<=$6 && $6<6) {print $1,$2}}' $event | gmt plot -Sc0.2c -G100 -W0.05p,120
+awk '{if (6<=$6) {print $1,$2}}' $event | gmt plot -Sa0.5c -Ggold1 -W0.05p,120
+
 
 ###GPS
 #Relative Velocity
@@ -45,76 +43,80 @@ gmt psvelo temp3.out -Se$scale/0.95/4  -Gblue -W0.5p,blue -A0.2c+p1.2p+e  -t20
 awk -F, 'NR>1 {print $1,$2,$3,$4,$5,$6,$7}' $AGPS >temp4.out
 gmt psvelo temp4.out -Se$scale/0.95/4  -Gdodgerblue1 -W0.3p,dodgerblue1 -A0.2c+p1.2p+e  -t20
 
-###Plate name
-gmt text -F+f18p,3,black+jLM <<EOF
-38 35 Arabian Plate
-47 35 Eurasian Plate
-31 39 Anatolian Block
-32 33 Africa
-32 32 Plate
+
+##Volcano
+cat $Volcano | awk -F, 'NR>1 {if ($7 == "1") print $3,$2}' | gmt plot -Skvolcano/0.45 -Gdarkred -W0.5p,black
+cat $Volcano | awk -F, 'NR>1 {if ($7 == "2") print $3,$2}' | gmt plot -Skvolcano/0.45 -Gblack -W0.5p,black
+cat $Volcano | awk -F, 'NR>1 {if ($7 == "3") print $3,$2}' | gmt plot -Skvolcano/0.45 -Ggrey -W0.5p,black
+
+##Geology
+gmt text -F+a -F+f20p,7,black=~1.5,white+jLM <<EOF
+42.5 43.1 -21 Greater Caucasus 
+44 41.35 -22 Lesser Caucasus
+40.5 40.5 0 NE Anatolian Plateau
 EOF
-
-
-
-
-gmt text -F+a -F+f16p,7,black=~1.5,white+jLM <<EOF
-42 43.5 -23 Greater Caucasus 
-41.8 41.8 -22 Lesser Caucasus
-50 34 0 Iranian Plateau
-48 33.5 -37 Zargos
-55.5 37.8 0 Kopeh dagu
-56 36.8 0 Binalud
-EOF
-
+##Sea
 gmt text -F+f14p,9,50+jLM <<EOF
-49.8 39 Caspian
-50.3 38 Sea
-39.5 42.5 Black Sea
+40.3 42 Black Sea
+EOF
+##Conutry name
+gmt text -F+a -F+f11p,32,200=~1,50+jLM <<EOF
+42.9 40.6 0 Turkey
+44.6 40.85 0 Aremina
+45.5 41.6 -23 Georgia
+46 42.3 -33 Russia
+45.5 41.2 -20 Azerbaijan
+45.9 38.7 0 Iran
 EOF
 
 
 ##Legend
 gmt colorbar -C -Dx2.5c/-1c+w5c/0.3c+jTC+h+ml -Bxaf+l"Topography" -By+lm -N
 
-# ##GPS
-# echo 40 29.5 GPS Velocity relative to EU|gmt text  -F+f10p,5,50+jLM -N
-# echo 40.5 25.7 10mm/yr | gmt text -F+f8p,5,50+jCM -N
-# gmt text -F+f8.5p,5,50+jLM -N <<EOF
-# 41.2 28.7 IPGN
-# 41.2 27.9 Raeesi et al., (2017)
-# 41.2 27.1 Relinger et al., (2006)
-# 41.2 26.3 Karakhanyan, A et al., (2013)
-# EOF
-# gmt psvelo -Se$scale/0.95/4  -G$Rcolor -W0.5p,$Rcolor -A0.3c+p1.2p+e  -N<<EOF
-# 40 28.7 10 0 0 0 0
-# EOF
-# gmt psvelo -Se$scale/0.95/4  -Gdarkred -W0.5p,darkred -A0.3c+p1.2p+e  -N<<EOF
-# 40 27.9 10 0 0 0 0
-# EOF
-# gmt psvelo -Se$scale/0.95/4  -Gblue -W0.5p,blue -A0.3c+p1.2p+e  -N<<EOF
-# 40 27.1 10 0 0 0 0
-# EOF
-# gmt psvelo -Se$scale/0.95/4  -Gdodgerblue1 -W0.5p,dodgerblue1 -A0.3c+p1.2p+e -N <<EOF
-# 40 26.3 10 0 0 0 0
-# EOF
-# ##Plate
-# echo 48 29.5 Plate motion relative to EU|gmt text  -F+f10p,5,50+jLM -N
-# echo 48 28.7 90 1.5c | gmt plot -SV1c+ea -W8p,50 -G50 -N
-# echo 50.5 28.7 Model: GSRMv2.1 | gmt text -F+f8p,5,50+jLM -N
-# echo 50.5 28.0 Kreemer et al., 2014 | gmt text -F+f8p,5,50+jLM -N
-# ##Earthquake
-# echo 56 29.5 Earthquakes | gmt text  -F+f10p,5,50+jLM -N
-# echo 56 28.7 | gmt plot -Sc0.08c -G160 -W0.05p,120 -N
-# echo 56 27.9 | gmt plot -Sc0.1c -G140 -W0.05p,120 -N
-# echo 56 27.1 | gmt plot -Sa0.3c -Ggold1 -W0.05p,120 -N
-# gmt text -F+f8.5p,5,50+jLM -N <<EOF
-# 56.5 28.7 4.0 @~\243@~ Mag< 5.0
-# 56.5 27.9 5.0 @~\243@~ Mag< 6.0
-# 56.5 27.1 6.0 @~\243@~ Mag
-# EOF
+##GPS
+echo 42.5 38.35 GPS Velocity relative to EU|gmt text  -F+f10p,5,50+jLM -N
+echo 42.5 37.6 10mm/yr | gmt text -F+f8p,5,50+jLM -N
+gmt text -F+f8.5p,5,50+jLM -N <<EOF
+42.9 38.2 IPGN
+42.9 38.05 Raeesi et al., (2017)
+42.9 37.9 Relinger et al., (2006)
+42.9 37.75 Karakhanyan, A et al., (2013)
+EOF
+gmt psvelo -Se$scale/0.95/4  -G$Rcolor -W0.5p,$Rcolor -A0.3c+p1.2p+e  -N<<EOF
+42.5 38.2 10 0 0 0 0
+EOF
+gmt psvelo -Se$scale/0.95/4  -Gdarkred -W0.5p,darkred -A0.3c+p1.2p+e  -N<<EOF
+42.5 38.05 10 0 0 0 0
+EOF
+gmt psvelo -Se$scale/0.95/4  -Gblue -W0.5p,blue -A0.3c+p1.2p+e  -N<<EOF
+42.5 37.9 10 0 0 0 0
+EOF
+gmt psvelo -Se$scale/0.95/4  -Gdodgerblue1 -W0.5p,dodgerblue1 -A0.3c+p1.2p+e -N <<EOF
+42.5 37.75 10 0 0 0 0
+EOF
 
+##Earthquake
+echo 44.75 38.35 Earthquakes | gmt text  -F+f10p,5,50+jLM -N
+echo 44.75 38.2 | gmt plot -Sc0.1c -G160 -W0.05p,120 -N
+echo 44.75 38.0 | gmt plot -Sc0.2c -G100 -W0.05p,120 -N
+echo 44.75 37.8 | gmt plot -Sa0.5c -Ggold1 -W0.05p,120 -N
+gmt text -F+f8.5p,5,50+jLM -N <<EOF
+44.85 38.2 4.0 @~\243@~ Mag< 5.0
+44.85 38.0 5.0 @~\243@~ Mag< 6.0
+44.85 37.8 6.0 @~\243@~ Mag
+EOF
 
+##Volcano
+echo 45.9 38.35 Volcanos | gmt text  -F+f10p,5,50+jLM -N
+echo 46 38.2 |gmt plot -Skvolcano/0.45 -Gdarkred -W0.5p,black -N
+echo 46 38.0 |gmt plot -Skvolcano/0.45 -Gblack -W0.5p,black -N
+echo 46 37.8 |gmt plot -Skvolcano/0.45 -Ggrey -W0.5p,black -N
 
+gmt text -F+f8.5p,5,50+jLM -N <<EOF
+46.2 38.2 Last eruption< 10000yrs
+46.2 38.0 Holocene
+46.2 37.8 Pleistocene
+EOF
 
 gmt end show
 
