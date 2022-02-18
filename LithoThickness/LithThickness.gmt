@@ -4,8 +4,8 @@ set int=Armenia.int
 set Lithtxt=/Volumes/home/Research/DataBase/04_CAM2016Litho/CAM2016Litho
 set Plotgrd=LithThickness.nc
 set Region=39/48/37.5/44.5
-
-gmt begin LithThickness_Armenia png A+m1c
+set Volcano=/Volumes/home/Research/DataBase/01_Armenia/02_Volcano_list.csv
+gmt begin LithThickness_Armenia png,pdf A+m1c
 gmt set FORMAT_GEO_MAP ddd.x
 gmt set FONT_LABEL 12p,4,black
 gmt set FONT_TITLE 18p,26,black
@@ -23,6 +23,12 @@ gmt makecpt -Cpolar -I -H -A50 -T40/150/10 -Z > Lith.cpt
 gmt grdimage $Plotgrd -CLith.cpt -t30
 gmt grdcontour $Plotgrd -C10 -A20+12p -Wa2p,black -Wc0.5p,black,- -JM7.5i 
 
-gmt coast -W2p -Dh -A150  -EAM,TR,IR,GE,RU,IQ,AZ,KZ,UZ,SY,JO+p2p,black  -t30 
+gmt coast -W2p -Dh -A150  -EAM,TR,IR,GE,RU,IQ,AZ,KZ,UZ,SY,JO+p1p,black,--  -t30 
+
+##Volcano
+cat $Volcano | awk -F, 'NR>1 {if ($7 == "1") print $3,$2}' | gmt plot -Skvolcano/0.45 -Gdarkred -W0.5p,black
+cat $Volcano | awk -F, 'NR>1 {if ($7 == "2") print $3,$2}' | gmt plot -Skvolcano/0.45 -Gblack -W0.5p,black
+cat $Volcano | awk -F, 'NR>1 {if ($7 == "3") print $3,$2}' | gmt plot -Skvolcano/0.45 -Ggrey -W0.5p,black
+
 gmt colorbar -CLith.cpt -t30 -Dx4c/-0.6c+w8c/0.3c+jTC+h -Bxa20f10+l"Lithospheric Thickness" -By+lkm
 gmt end show

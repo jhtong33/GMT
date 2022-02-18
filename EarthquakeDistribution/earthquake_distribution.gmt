@@ -1,9 +1,9 @@
 #!/bin/csh
 set lon=43.8036
 set lat=41.115
-set catalog=/Volumes/home/Research/STEP/06_CIA_SWS_result/Event_SKSresult_2010-2020.csv
+set catalog=/Volumes/home/Research/STEP/06_CIA_SWS_result/Event_SKSresult_2010-2020_v2.csv
 
-gmt begin earthquake_distribution2010-2020 pdf,png A+m1c
+gmt begin earthquake_distribution2010-2020_v2 pdf,png A+m1c
 gmt set FORMAT_GEO_MAP=+D
 gmt set FONT_LABEL 12p,4,black
 gmt set FONT_TITLE 18p,26,black
@@ -46,9 +46,11 @@ gmt text -F+f12p,5 -R0/10/0/10 -JX6i -N <<EOF
 8.2 -1.2 6
 8.8 -1.2 6.5
 9.5 -1.2 7
-6   -1.2 nonNull:70
-6   -0.8 Null:303
+6   -1.2 nonNull: 85
+6   -0.8 Null: 313
 EOF
 
+#### nonNull = 70 Null = 303 for version1
+#### nonNull = 85 Null = 313 for version2
 gmt end show
 

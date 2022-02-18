@@ -35,13 +35,13 @@ awk '{if (6<=$6) {print $1,$2}}' $event | gmt plot -Sa0.5c -Ggold1 -W0.05p,120
 set Rcolor=black
 set scale=0.1c
 awk -F, 'NR>1 && $9 ~ /Raeesi/ {print $2,$3,$4,$5,$6,$7,$8}' $GPS > temp.out
-gmt psvelo temp.out -Se$scale/0.95/4 -G$Rcolor -W1p,$Rcolor -A0.2c+p1.2p+e -t20
+gmt psvelo temp.out -Se$scale/0.95/4 -G$Rcolor -W1.5p,$Rcolor -A0.2c+p1.2p+e -t20
 awk -F, 'NR>1 && $9 ~ /IPGN/ {print $2,$3,$4,$5,$6,$7,$8}' $GPS > temp2.out
-gmt psvelo temp2.out -Se$scale/0.95/4  -Gdarkred  -W1p,darkred -A0.2c+p1.2p+e  -t20
+gmt psvelo temp2.out -Se$scale/0.95/4  -Gdarkred  -W1.5p,darkred -A0.2c+p1.2p+e  -t20
 awk 'NR>1 {print $2,$3,$4,$5,$6,$7,$8}' $RGPS > temp3.out
-gmt psvelo temp3.out -Se$scale/0.95/4  -Gblue -W1p,blue -A0.2c+p1.2p+e  -t20
+gmt psvelo temp3.out -Se$scale/0.95/4  -Gblue -W1.5p,blue -A0.2c+p1.2p+e  -t20
 awk -F, 'NR>1 {print $1,$2,$3,$4,$5,$6,$7}' $AGPS >temp4.out
-gmt psvelo temp4.out -Se$scale/0.95/4  -Gdodgerblue1 -W0.6p,dodgerblue1 -A0.2c+p1.2p+e  -t20
+gmt psvelo temp4.out -Se$scale/0.95/4  -Gdodgerblue1 -W1p,dodgerblue1 -A0.2c+p1.2p+e  -t20
 
 
 ##Volcano
@@ -60,7 +60,7 @@ gmt text -F+f14p,9,50+jLM <<EOF
 40.3 42 Black Sea
 EOF
 ##Conutry name
-gmt text -F+a -F+f11p,32,200=~1,50+jLM <<EOF
+gmt text -F+a -F+f15p,32,200=~1,50+jLM <<EOF
 42.9 40.6 0 Turkey
 44.6 40.85 0 Aremina
 45.5 41.6 -23 Georgia
