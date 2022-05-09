@@ -2,6 +2,8 @@
 set grd=Armenia.grd
 set int=Armenia.int
 set file=/Volumes/home/Research/DataBase/03_PlateMotion/velocity_NNR_fromGSRM.dat
+set region=40/47/39.5/44.25
+
 
 gmt begin APM_GSRM_NNR png,pdf A+m1c
 gmt set FORMAT_GEO_MAP ddd.x
@@ -9,8 +11,8 @@ gmt set FONT_LABEL 12p,4,black
 gmt set FONT_TITLE 18p,26,black
 
 gmt makecpt -Celevation -T0/4000/500 -D -Z
-gmt basemap -JM7.5i  -R40/47/39.5/44.25 -Ba1f0.5 -BWNse -X+2 -Y+3
-gmt grdcut @earth_relief_30s -G$grd -R30/60/27/45
+gmt basemap -JM7.5i  -R$region -Ba1f0.5 -BWNse -X+2 -Y+3
+gmt grdcut @earth_relief_30s -G$grd -R$region
 gmt grdimage $grd -I+d  -t20 -M
 gmt grdgradient $grd -A0/90 -G$int -Ne0.2
 gmt coast -W3p -Dh -A150  -EAM,TR,IR,GE,RU,IQ,AZ,KZ,UZ,SY,JO+p2p,black  -t60 #-Lg44/46+c42+w1000+u -S145/200/255
