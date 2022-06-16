@@ -2,8 +2,10 @@
 set lon=43.8036
 set lat=41.115
 set catalog=/Volumes/home/Research/STEP/06_CIA_SWS_result/Event_XKSresult_2010-2020_v3.csv
+set searchCAT=/Volumes/home/Research/DataBase/10_Search_earthquake_from_Catalog/2010-2020_search_events.txt
 
-gmt begin earthquake_distribution2010-2020_used pdf,png A+m1c
+
+gmt begin earthquake_distribution2010-2020_used_v2 pdf,png A+m1c
 gmt set FORMAT_GEO_MAP=+D
 gmt set FONT_LABEL 12p,4,black
 gmt set FONT_TITLE 18p,26,black
@@ -29,6 +31,9 @@ cat <<EOF > xannots.txt
 600 a
 700 a
 EOF
+
+awk '{if ($6<6.5) print $1, $2 }' $searchCAT | gmt plot -Sc0.05i -W0.5p,black -Ggrey
+awk '{if (6.5 <= $6) print $1, $2 }' $searchCAT | gmt plot -Sc0.08i -W0.5p,black -Ggrey
 
 cat $catalog | awk -F, 'NR>1{if ($5<6.5) print $3, $2, $4}' | gmt plot -Sc0.05i -W0.5p,black -Cmyseis.cpt
 cat $catalog | awk -F, 'NR>1{if (6.5 <= $5 && $5<7) print $3, $2, $4}' | gmt plot -Sc0.08i -W0.5p,black -Cmyseis.cpt
