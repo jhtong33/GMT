@@ -1,0 +1,33 @@
+#!/bin/csh
+set depth=$1
+
+set grdfile=Pout$depth.grd
+set region=20/50/30/45 
+set stafile=/Volumes/home/Research/DataBase/01_Armenia/Station_info_2.csv
+set file=/Volumes/home/Research/DataBase/17_RegionalTomo_Kounoudis2020/P_WAVE_MODEL/P_TOMO_MODEL_30_KM_DEPTH_INTERVALS
+set title=P_tomo_$depth
+
+if ( $depth > 210 ) then
+	set cmap=cmap_tomo_-3-3.cpt
+else
+	set cmap=cmap_tomo.cpt
+endif
+	
+
+gmt begin $title pdf,png A+m1c
+gmt set FORMAT_GEO_MAP ddd.x
+gmt set FONT_LABEL 12p,4,black
+gmt set FONT_TITLE 18p,26,black
+
+# gmt makecpt -Chaxby -T-6/6/0.5 -D -Z -H -I> cmap_tomo.cpt
+gmt basemap -JM7.5i -R$region -Ba4f2 -BWNse+t$title -X+2 -Y+3 
+
+awk '{if ($3=='$depth') print $2, $1, $4*100}' $file | gmt surface -G$grdfile -I0.05/0.05 -R20/50/30/50
+echo "==============surface finish $depth km"
+gmt grdimage $grdfile -R$region -JM7.5i -C$cmap -E75 
+
+gmt coast -W1p -Dh -A150  -EAM,TR,IR,GE,RU,IQ,AZ,KZ,UZ,SY,JO+p0.3p,black  -S145/200/255 -t50
+gmt colorbar -C$cmap -Dx0.15i/-0.3i+w3i/0.15i+h+e -Bxa1f0.2+l"dVp in %" 
+
+
+gmt end
