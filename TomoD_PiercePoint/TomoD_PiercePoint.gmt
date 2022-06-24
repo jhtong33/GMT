@@ -1,47 +1,58 @@
 #!/bin/csh
-# set STA=$1
-# set stlat=$2
-# set stlon=$3
-# set stlat_text=$4
+set STA=$1
+set stlat=$2
+set stlon=$3
+set stlat_text=$4
 set grdfile=dvs_at_2700km.grd
-set region=0/80/20/60  ## for large range -> v1
-# set PPfile=`ls *$STA*.csv`
+set region=0/80/10/60  ## for large range -> v1
+set PPfile=`ls PPcsv/*$STA*.csv`
 set stafile=/Volumes/home/Research/DataBase/01_Armenia/Station_info_2.csv
-# set filename=TomoD_PiercePoint_$STA
+set filename=version2/TomoD_PiercePoint_`echo $STA`_v2
 
-gmt begin qqq0.27 pdf,png A+m1c
+gmt begin $filename pdf,png A+m1c
 gmt set FORMAT_GEO_MAP ddd.x
 gmt set FONT_LABEL 12p,4,black
 gmt set FONT_TITLE 18p,26,black
 
-gmt makecpt -Cwysiwyg -T-1.5/1.5/0.1 -D -Z -H -I> cmap_gypsum.cpt
+gmt makecpt -Cpolar -T-1.5/1.5/0.1 -D -Z -H -I> cmap_gypsum.cpt
 gmt grdimage $grdfile -R$region -JL40/40/0/80/8.5i -Ccmap_gypsum.cpt -E75 
 gmt colorbar -Ccmap_gypsum.cpt -Dx-0.15i/-0.15i+w1.3i/0.1i+h+e -Bxa1f0.1+l"dVs in %, 2700km" 
 # gmt colorbar -Dx-0.15i/0.15i+w1.3i/0.1i+h+e #-B+t"dVs in %, 2700km"
 
-gmt coast -Ba10f2 -BSWne -Wthinnest -Df -A10/0/1
-gmt grdcontour $grdfile -JL40/40/0/80/8.5i -C-1,-0.5,-0.27 -W1p,120,- -A100,+f10p #-C-1,-0.5
-# cat $PPfile | awk -F, 'NR>1 {if ($5=="True" && $6=="SKS") print $4, $3}'| gmt plot -Sc0.05i -W1p -Gwhite
-# cat $PPfile | awk -F, 'NR>1 {if ($5=="True" && $6=="SKKS") print $4, $3}'| gmt plot -Sc0.05i -W1p -G100
-# cat $PPfile | awk -F, 'NR>1 {if ($5=="False" && $6=="SKS") print $4, $3, $1, $2*500, 50}'| gmt plot -SJ -Gwhite -W0.85p,black
-# cat $PPfile | awk -F, 'NR>1 {if ($5=="False" && $6=="SKKS") print $4, $3, $1, $2*500, 50}'| gmt plot -SJ -G100 -W0.85p,white
-# echo $stlon, $stlat | gmt plot -St0.15i -W1p -Gred
-# echo $stlon, $stlat_text , $STA | gmt text -F12p,7
+gmt coast -Ba10f2 -BSWne -W0.1p -Dh -A1000
+gmt grdcontour $grdfile -JL40/40/0/80/8.5i -C-1,-0.5, -W0.5p,120,- -A0.5+f5p #-C-1,-0.5
+gmt grdcontour $grdfile -JL40/40/0/80/8.5i -C-0.27, -W0.8p,120,- -A-0.27,+f7p #-C-1,-0.5
+cat $PPfile | awk -F, 'NR>1 {if ($5=="True" && $6=="SKS") print $4, $3}'| gmt plot -Sc0.05i -W1p -Gwhite
+cat $PPfile | awk -F, 'NR>1 {if ($5=="True" && $6=="SKKS") print $4, $3}'| gmt plot -Sc0.05i -W1p -G100
+cat $PPfile | awk -F, 'NR>1 {if ($5=="False" && $6=="SKS") print $4, $3, $1, $2*500, 50}'| gmt plot -SJ -Gwhite -W0.85p,black
+cat $PPfile | awk -F, 'NR>1 {if ($5=="False" && $6=="SKKS") print $4, $3, $1, $2*500, 50}'| gmt plot -SJ -G100 -W0.85p,white
+echo $stlon, $stlat | gmt plot -St0.15i -W1p -Gred
+echo $stlon, $stlat_text , $STA | gmt text -F12p,7
+echo 40 45 Caucasus | gmt text -F+f9p,5,black+jLB
+gmt plot -W1.5p,black <<EOF
+40 39.5
+47 39.5
+47 44.5
+40 44.5
+40 39.5
+EOF
 
-gmt legend -Dx0.45/0.2/1.5c/1.1c/BL -F+r2p+pblack+gwhite+p0.8p <<EOF
+gmt legend -Dx0.45/0.2/1.6c/1.1c/BL -F+r2p+pblack+gwhite+p0.8p <<EOF
 G 0.01i
 N 1
 S 0.15c c 0.19c white 0.6p 0.45c SKS
 G 0.15c
-S 0.15c c 0.19c 100 0.6p 0.45c SKS
+S 0.15c c 0.19c 100 0.6p 0.45c SKKS
 G 0.02i
 EOF
-gmt text -F+f9p,5 -Gwhite@40  <<EOF
+gmt text -F+f12p,5 -Gwhite@40  <<EOF
 45 55 Perm Anomaly
 8 25 African LLSVP
+44 15 Afar
 EOF
 gmt plot -SJ -Gblack -W1p,black -Wthin -N <<EOF
 40 65 90 500 50 
 EOF
 echo 40 63 1s | gmt text -F12p,7 -N
-gmt end show
+
+gmt end
