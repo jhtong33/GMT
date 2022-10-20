@@ -1,0 +1,42 @@
+#!/bin/csh
+set grd=Armenia.grd
+set int=Armenia.int
+set file=/Volumes/home/Research/DataBase/03_PlateMotion/velocity_NNR_fromGSRM.dat
+set region=30/60/27/45
+
+
+gmt begin APM_GSRM_NNR png,pdf A+m1c
+gmt set FORMAT_GEO_MAP ddd.x
+gmt set FONT_LABEL 12p,4,black
+gmt set FONT_TITLE 18p,26,black
+
+gmt makecpt -Celevation -T0/4000/500 -D -Z
+gmt basemap -JM7.5i  -R$region -Ba1f0.5 -BWNse -X+2 -Y+3
+gmt grdcut @earth_relief_30s -G$grd -R$region
+gmt grdimage $grd -I+d  -t20 -M
+gmt grdgradient $grd -A0/90 -G$int -Ne0.2
+gmt coast -W2p -Dh -A150 -t60  -EAM,TR,IR,GE,RU,IQ,AZ,KZ,UZ,SY,JO+p1p,black #-Lg44/46+c42+w1000+u -S145/200/255
+gmt plot PB2002_boundaries.dig.txt -W4p,gray30
+
+# gmt velo $file -Se0.01c/0.95 -L -A0.5c+p3p+e -W1.0p,red
+gmt velo -Sn0.5 -A0.5c+p3p+e -W1.5p,red $file
+gmt plot -Gwhite@20 <<EOF
+60 45
+60 43
+57 43
+57 45
+EOF
+
+# gmt velo -Se0.01c/0.95 -W0.5p,red -L -A1.0c+p3p+e <<EOF
+gmt velo -Sn0.5 -A0.5c+p4p+e -W1.5p,red<<EOF
+57.1 44 30 0 0 0 3
+EOF
+
+gmt text -F+f10p,5,black+jLM <<EOF
+57.1 43.5 3 cm/yr
+57.1 44.5 GSRM NNR
+EOF
+
+
+
+gmt end show
