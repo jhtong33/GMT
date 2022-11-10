@@ -1,0 +1,96 @@
+#!/bin/csh
+set grd=Armenia.grd
+set int=Armenia.int
+set sta=Station_info.csv
+set Volcano=02_Volcano_list.csv
+set LITHPATH=/Volumes/home/Research/GMT/LithoThickness
+gmt begin map_station_distribution_lith pdf A+m1c
+gmt set FORMAT_GEO_MAP ddd.x
+gmt set FONT_LABEL 12p,4,black
+gmt set FONT_TITLE 18p,26,black
+
+
+
+gmt basemap -JM7.5i -R40/47/39.5/44.3 -Ba1f0.5 -BWNse -X+2 -Y+2.5
+gmt grdimage $LITHPATH/area_masked.grd -C$LITHPATH/Lith.cpt -t40
+gmt grdcontour $LITHPATH/area_masked.grd -L40/180 -C10 -A20+15p -Wa1.5p,black -Wc0.5p,black,- -JM7.5i
+gmt coast -W3p -Dh -A150 -EAM,TR,IR,GE,RU,IQ,AZ+p1.0p,black,-- -t40 #-Lg44/46+c42+w1000+u
+gmt coast  -EAM,GE,+p2p,black,-- 
+#gmt colorbar -C -Dx3.5/-0.5+w10c/0.5c+o0c/-1c+mc+jBL+h -Bxaf -By+l"Elevation (m)" 
+
+##Volcano
+cat $Volcano | awk -F, 'NR>1 {if ($5 == "Holocene") print $3,$2}' | gmt plot -Skvolcano/0.45 -Gblack
+cat $Volcano | awk -F, 'NR>1 {if ($5 != "Holocene") print $3,$2}' | gmt plot -Skvolcano/0.45 -G100
+####Station AM
+cat $sta | awk -F, 'NR>1 {if ($1 == "AM") print $4,$3}' | gmt plot -Sc0.3 -Gspringgreen -W1p,black
+cat $sta | awk -F, 'NR>1 {if ($1 == "AM" && $2 != "BYUR") print $4,$3-0.12,$2}' |  gmt text -F+f10p,5,black+jMC -Gwhite@40
+cat $sta | awk -F, 'NR>1 {if ($2 == "BYUR") print $4+0.13,$3-0.15,$2}' |  gmt text -F+f10p,5,black+jLM -Gwhite@40
+####Station II/IU
+cat $sta | awk -F, 'NR>1 {if ($1 == "II") print $4,$3}' | gmt plot -Sd0.3 -Gred -W1p,black
+cat $sta | awk -F, 'NR>1 {if ($1 == "IU") print $4,$3}' | gmt plot -Sd0.3 -Gred -W1p,black
+cat $sta | awk -F, 'NR>1 {if ($1 == "II") print $4,$3-0.12,$2}' |  gmt text -F+f10p,5,black+jMC -Gwhite@40
+cat $sta | awk -F, 'NR>1 {if ($1 == "IU") print $4,$3-0.12,$2}' |  gmt text -F+f10p,5,black+jMC -Gwhite@40
+####Station AB
+cat $sta | awk -F, 'NR>1 {if ($1 == "AB") print $4,$3}' | gmt plot -Sc0.3 -Gdeepskyblue1 -W1p,black
+cat $sta | awk -F, 'NR>1 {if ($1 == "AB" && $2 != "QZX") print $4,$3-0.12,$2}' |  gmt text -F+f10p,5,black+jMC -Gwhite@40
+cat $sta | awk -F, 'NR>1 {if ($1 == "AB" && $2 == "QZX") print $4,$3+0.12,$2}' |  gmt text -F+f10p,5,black+jMC -Gwhite@40
+
+####Station GO
+cat $sta | awk -F, 'NR>1 {if ($1 == "GO") print $4,$3}' | gmt plot -Sc0.3 -Gorange -W1p,black
+cat $sta | awk -F, 'NR>1 {if ($2 == "AKH") print $4-0.05,$3+0.05,$2}' |  gmt text -F+f10p,5,black+jRM -Gorange@60
+cat $sta | awk -F, 'NR>1 {if ($2 == "ONI") print $4,$3-0.12,$2}' |  gmt text -F+f10p,5,black+jMC -Gorange@60
+cat $sta | awk -F, 'NR>1 {if ($2 == "CHVG") print $4,$3-0.12,$2}' |  gmt text -F+f10p,5,black+jMC -Gorange@60
+cat $sta | awk -F, 'NR>1 {if ($2 == "GUDG") print $4,$3-0.12,$2}' |  gmt text -F+f10p,5,black+jMC -Gorange@60
+cat $sta | awk -F, 'NR>1 {if ($2 == "TRLG") print $4,$3-0.12,$2}' |  gmt text -F+f10p,5,black+jMC -Gorange@60
+cat $sta | awk -F, 'NR>1 {if ($2 == "DGRG") print $4,$3+0.12,$2}' |  gmt text -F+f10p,5,black+jMC -Gorange@60
+cat $sta | awk -F, 'NR>1 {if ($2 == "SEAG") print $4+0.05,$3+0.08,$2}' |  gmt text -F+f10p,5,black+jLB -Gorange@60
+cat $sta | awk -F, 'NR>1 {if ($2 == "TBLG") print $4,$3-0.12,$2}' |  gmt text -F+f10p,5,black+jMC -Gorange@60
+cat $sta | awk -F, 'NR>1 {if ($2 == "BGD") print $4-0.07,$3-0.05,$2}' |  gmt text -F+f10p,5,black+jRT -Gorange@60
+####Station TG
+# cat $sta | awk -F, 'NR>1 {if ($1 == "TG") print $4-0.1,$3,$2}' | gmt text -F+f10p,5,black+jRM -Gred@40
+cat $sta | awk -F, 'NR>1 {if ($1 == "TG") print $4,$3}' | gmt plot -Sc0.3 -Gblue -W1p,black
+cat $sta | awk -F, 'NR>1 {if ($2 == "BATM") print $4+0.07,$3,$2}' | gmt text -F+f10p,5,black+jLM -Gwhite@40
+cat $sta | awk -F, 'NR>1 {if ($1 == "TG" && $4 >46) print $4-0.1,$3,$2}' | gmt text -F+f10p,5,black+jRM -Gwhite@40
+cat $sta | awk -F, 'NR>1 {if ($2 == "GUDA") print $4,$3-0.23,$2}' | gmt text -F+f10p,5,black+jCM -Gwhite@40
+cat $sta | awk -F, 'NR>1 {if ($1 == "TG" && $3 >42 && $2 != "GUDA") print $4-0.1,$3,$2}' | gmt text -F+f10p,5,black+jRM -Gwhite@40
+# cat $sta | awk -F, 'NR>1 {if ($1 == "TG") print $4-0.1,$3,$2}' | gmt text -F+f10p,5,black+jRM -Gred@40
+cat $sta | awk -F, 'NR>1 {if ($2 == "ABST") print $4-0.1,$3,$2}' | gmt text -F+f10p,5,black+jRM -Gwhite@40
+cat $sta | awk -F, 'NR>1 {if ($2 == "AZMN") print $4-0.1,$3,$2}' | gmt text -F+f10p,5,black+jRM -Gwhite@40
+cat $sta | awk -F, 'NR>1 {if ($2 == "BKRG") print $4-0.1,$3,$2}' | gmt text -F+f10p,5,black+jRM -Gwhite@40
+cat $sta | awk -F, 'NR>1 {if ($2 == "KZRT") print $4+0.12,$3,$2}' | gmt text -F+f10p,5,black+jLM -Gwhite@40
+cat $sta | awk -F, 'NR>1 {if ($2 == "DMNI") print $4,$3-0.12,$2}' | gmt text -F+f10p,5,black+jCM -Gwhite@40
+cat $sta | awk -F, 'NR>1 {if ($2 == "GANZ") print $4-0.02,$3-0.06,$2}' | gmt text -F+f10p,5,black+jLT -Gwhite@40
+cat $sta | awk -F, 'NR>1 {if ($2 == "BURN") print $4+0.02,$3+0.12,$2}' | gmt text -F+f10p,5,black+jLM -Gwhite@40
+cat $sta | awk -F, 'NR>1 {if ($2 == "BRNG") print $4+0.02,$3+0.2,$2}' | gmt text -F+f10p,5,black+jLM -Gwhite@40
+cat $sta | awk -F, 'NR>1 {if ($2 == "TRLT") print $4+0.02,$3+0.12,$2}' | gmt text -F+f10p,5,black+jCM -Gwhite@40
+
+cat << EOF |gmt text -F+f15p,5,black+jLM  -N
+40.5 39.3 TG network
+40.5 39 GO network
+42.2 39.3 AM network
+43.8 39.3 GSN network
+42.2 39 AB network
+45.4 39.3 Holocene Volcano
+45.4 39 Pleistocene Volcano
+EOF
+
+echo 40.2 39.3 | gmt plot  -Sc0.3 -Gblue -W0.3p,black -N
+echo 40.2 39 | gmt plot  -Sc0.3 -Gorange -W0.3p,black -N
+echo 41.9 39.3 | gmt plot  -Sc0.3 -Gspringgreen -W0.3p,black -N
+echo 43.6  39.3 | gmt plot  -Sd0.3 -Gred -W0.3p,black -N
+echo 41.9 39 | gmt plot  -Sc0.3 -Gdeepskyblue1 -W0.3p,black -N
+echo 45.2 39.3 | gmt plot  -Skvolcano/0.45 -Gblack -N
+echo 45.2 39 | gmt plot  -Skvolcano/0.45 -G100 -N
+
+
+### country name
+echo 43 43.2 Russia | gmt text -F+f17p,3,black -Gwhite@30 -C0.1c/0.1c+tO
+echo 41 42 Black Sea| gmt text -F+f17p,3,black 
+echo 42.2 42.1 Georgia| gmt text -F+f17p,3,black -Gwhite@30 -C0.1c/0.1c+tO
+echo 44.7 40.8 AM| gmt text -F+f17p,3,black -Gwhite@30 -C0.1c/0.1c+tO
+echo 42 40.5 Turkey| gmt text -F+f18p,3,black -Gwhite@30  -C0.1c/0.1c+tO
+echo 46.1 41 Azerbaijan| gmt text -F+f16p,3,black+a-22 -Gwhite@30 -C0.1c/0.1c+tO
+
+gmt colorbar -C$LITHPATH/Lith.cpt -Dx15.5c/17c+w5c/0.3c+jTC+h -Bxa20f10+l"Lithospheric Thickness" -By+lkm
+
+gmt end show
